@@ -1,0 +1,10 @@
+[alias]
+dev = ["watch", "-w", "./src", "-x", "run dev"]
+typegen = [
+  "typeshare",
+  ".",
+  "--lang",
+  "typescript",
+  "--output",
+  "src/api-types.ts",
+]
