@@ -14,18 +14,20 @@ use typeshare::typeshare;
 
 use crate::AppState;
 
+const DEFAULT_API_KEY: &str = "SUKSES_IWAG_UNTUK_BELI_TANGGA_BARU";
+
 #[instrument(skip_all)]
 pub fn layer() -> axum::Router<Arc<crate::AppState>> {
     let bearer_token = std::env::var("API_KEY");
     if bearer_token.is_err() {
-        warn!("API_KEY is not set! Using default value of `SUKSES_IWAG_UNTUK_HOPESA`");
+        warn!("API_KEY is not set! Using default value of `{DEFAULT_API_KEY}`");
     }
 
     axum::Router::new()
         .route("/url", post(create_url))
         .route("/urls", get(list_urls))
         .layer(ValidateRequestHeaderLayer::bearer(
-            &bearer_token.unwrap_or_else(|_| "SUKSES_IWAG_UNTUK_HOPESA".to_string()),
+            &bearer_token.unwrap_or_else(|_| DEFAULT_API_KEY.to_string()),
         ))
 }
 
