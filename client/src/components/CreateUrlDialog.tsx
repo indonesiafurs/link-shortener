@@ -2,8 +2,7 @@ import { createSignal } from "solid-js"
 import type { CreateShortenedUrlDto } from "../api-types.d.ts"
 import xMark from "../assets/iconoir/xmark.svg"
 import Spinner from "../assets/spinner.svg"
-
-const API_URL = import.meta.env.VITE_BASE_API_URL
+import { API_URL } from "../constants.ts"
 
 type CreateShortUrlDialogProps = {
   ref: HTMLDialogElement

@@ -7,8 +7,7 @@ import type { DeleteShortenedUrlDto } from "../api-types.d.ts"
 import Copy from "../assets/iconoir/copy.svg"
 import qrCode from "../assets/iconoir/qr-code.svg"
 import xMark from "../assets/iconoir/xmark.svg"
-
-const API_URL = import.meta.env.VITE_BASE_API_URL
+import { API_URL } from "../constants.ts"
 
 interface CopyUrlButtonProps {
   shortUrl: string

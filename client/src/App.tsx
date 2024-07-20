@@ -5,8 +5,7 @@ import EyeOpen from "./assets/iconoir/eye-solid.svg"
 import { AppHeader } from "./components/AppHeader.tsx"
 import { CreateShortUrlDialog } from "./components/CreateUrlDialog.tsx"
 import { UrlCard } from "./components/UrlCard.tsx"
-
-const API_URL = import.meta.env.VITE_BASE_API_URL
+import { API_URL } from "./constants.ts"
 
 function App() {
   const [password, setPassword] = makePersisted(createSignal<string>(), { name: "password" })
