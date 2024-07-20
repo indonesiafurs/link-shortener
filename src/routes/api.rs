@@ -24,7 +24,7 @@ pub fn layer() -> axum::Router<Arc<crate::AppState>> {
     }
 
     axum::Router::new()
-        .route("/url", post(create_url))
+        .route("/url", post(create_url).delete(delete_url))
         .route("/urls", get(list_urls))
         .layer(ValidateRequestHeaderLayer::bearer(
             &bearer_token.unwrap_or_else(|_| DEFAULT_API_KEY.to_string()),
@@ -108,7 +108,35 @@ async fn create_url(
 
     stmt.execute(params![payload.short_url, payload.target_url,])
         .await
-        .expect("Unable to execute statement");
+
+    StatusCode::NO_CONTENT.into_response()
+}
+
+#[typeshare]
+#[derive(serde::Serialize, serde::Deserialize, Debug)]
+struct DeleteShortenedUrlDto {
+    short_url: String,
+}
+
+async fn delete_url(
+    State(state): State<Arc<AppState>>,
+    Json(payload): Json<DeleteShortenedUrlDto>,
+) -> impl IntoResponse {
+    let conn = state.db.clone();
+
+    let mut stmt = conn
+        .prepare("DELETE FROM links WHERE short_url = ?")
+        .await
+        .expect("Unable to prepare delete url statement");
+
+    let rows = stmt
+        .execute(params![payload.short_url,])
+        .await
+        .expect("Unable to execute delete url statement");
+
+    if rows == 0 {
+        return (StatusCode::NOT_FOUND, "Short URL not found").into_response();
+    }
 
     StatusCode::NO_CONTENT.into_response()
 }
