@@ -38,7 +38,7 @@ async fn migrate(conn: libsql::Connection) {
     if version == 0 {
         debug!("Migrating from version 0 -> 1");
         conn.execute(
-            "CREATE TABLE links (short_url TEXT PRIMARY KEY, target_url TEXT, active BOOLEAN DEFAULT 1)",
+            "CREATE TABLE links (short_url TEXT PRIMARY KEY, target_url TEXT, comment TEXT DEFAULT '', active BOOLEAN DEFAULT 1)",
             (),
         )
         .await

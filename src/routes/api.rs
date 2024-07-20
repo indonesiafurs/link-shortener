@@ -36,6 +36,7 @@ pub fn layer() -> axum::Router<Arc<crate::AppState>> {
 pub struct ShortenedUrl {
     short_url: String,
     target_url: String,
+    comment: Option<String>,
     active: bool,
 }
 
@@ -46,7 +47,10 @@ async fn list_urls(State(state): State<Arc<AppState>>) -> Json<AllShortenedUrls>
     let conn = state.db.clone();
 
     let mut rows = conn
-        .query("SELECT short_url, target_url, active FROM links", ())
+        .query(
+            "SELECT short_url, target_url, comment, active FROM links",
+            (),
+        )
         .await
         .expect("Unable to execute query");
 
@@ -54,10 +58,12 @@ async fn list_urls(State(state): State<Arc<AppState>>) -> Json<AllShortenedUrls>
     while let Some(row) = rows.next().await.expect("Unable to get row") {
         let short_url = row.get::<String>(0).expect("Unable to get short_url");
         let target_url = row.get::<String>(1).expect("Unable to get target_url");
-        let active = row.get::<bool>(2).expect("Unable to get active");
+        let comment = row.get::<Option<String>>(2).expect("Unable to get active");
+        let active = row.get::<bool>(3).expect("Unable to get active");
         urls.push(ShortenedUrl {
             short_url,
             target_url,
+            comment,
             active,
         });
     }
@@ -70,6 +76,7 @@ async fn list_urls(State(state): State<Arc<AppState>>) -> Json<AllShortenedUrls>
 pub struct CreateShortenedUrlDto {
     short_url: String,
     target_url: String,
+    comment: Option<String>,
 }
 
 #[instrument(skip(state))]
@@ -102,12 +109,13 @@ async fn create_url(
     let conn = state.db.clone();
 
     let mut stmt = conn
-        .prepare("INSERT INTO links (short_url, target_url) VALUES (?, ?)")
+        .prepare("INSERT INTO links (short_url, target_url, comment) VALUES (?, ?, ?)")
         .await
-        .expect("Unable to prepare statement");
+        .expect("Unable to prepare create url statement");
 
     stmt.execute(params![payload.short_url, payload.target_url,])
         .await
+        .expect("Unable to execute create url statement");
 
     StatusCode::NO_CONTENT.into_response()
 }
