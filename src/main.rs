@@ -9,7 +9,8 @@ use std::{net::SocketAddr, sync::Arc};
 
 use axum::{response::Redirect, routing::get};
 use tower_http::{
-    catch_panic::CatchPanicLayer, normalize_path::NormalizePathLayer, trace::TraceLayer,
+    catch_panic::CatchPanicLayer, cors::CorsLayer, normalize_path::NormalizePathLayer,
+    trace::TraceLayer,
 };
 use tracing::info;
 
@@ -29,6 +30,11 @@ async fn main() {
     let dbconn = db::prepare().await;
     let app_state = Arc::new(AppState { db: dbconn });
 
+    let permissive_cors = CorsLayer::new()
+        .allow_headers(tower_http::cors::Any)
+        .allow_methods(tower_http::cors::Any)
+        .allow_origin(tower_http::cors::Any);
+
     let app = axum::Router::new()
         .nest("/api", routes::api::layer())
         .route(
@@ -40,6 +46,7 @@ async fn main() {
         .with_state(app_state)
         .layer(NormalizePathLayer::trim_trailing_slash())
         .layer(CatchPanicLayer::new())
+        .layer(permissive_cors)
         .layer(TraceLayer::new_for_http());
 
     let tcp_listener = tokio::net::TcpListener::bind("0.0.0.0:3000")
