@@ -9,7 +9,10 @@ use std::{net::SocketAddr, sync::Arc};
 
 use axum::{response::Redirect, routing::get};
 use tower_http::{
-    catch_panic::CatchPanicLayer, cors::CorsLayer, normalize_path::NormalizePathLayer,
+    catch_panic::CatchPanicLayer,
+    cors::CorsLayer,
+    normalize_path::NormalizePathLayer,
+    services::{ServeDir, ServeFile},
     trace::TraceLayer,
 };
 use tracing::info;
@@ -35,13 +38,16 @@ async fn main() {
         .allow_methods(tower_http::cors::Any)
         .allow_origin(tower_http::cors::Any);
 
+    // TODO: Figure out how to *properly* serve the client-out dir
     let app = axum::Router::new()
+        .nest_service("/assets", ServeDir::new("client-out/assets"))
+        .route_service("/admin", ServeFile::new("client-out/index.html"))
+        .route_service("/logo.svg", ServeFile::new("client-out/logo.svg"))
         .nest("/api", routes::api::layer())
         .route(
             "/",
             get(|| async { Redirect::to("https://furries.id/en/links") }),
         )
-        .route("/admin", get(|| async { "Admin page" }))
         .fallback(get(routes::handle_short_url))
         .with_state(app_state)
         .layer(NormalizePathLayer::trim_trailing_slash())
