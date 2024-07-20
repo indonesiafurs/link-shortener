@@ -16,9 +16,5 @@ export default defineConfig({
       },
     },
   },
-  plugins: [solid({
-    babel: {
-      plugins: []
-    }
-  })],
+  plugins: [solid()],
 })
