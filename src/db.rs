@@ -10,7 +10,7 @@ pub async fn prepare() -> libsql::Connection {
         .await
         .expect("Unable to create / read links.db");
 
-    let conn = db.connect().expect("Unable to get connection");
+    let conn = db.connect().expect("Unable to get database connection");
 
     info!("Running migrations");
     migrate(conn.clone()).await;
