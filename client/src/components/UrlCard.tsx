@@ -1,5 +1,6 @@
 import type { ShortenedUrl } from "../api-types.d.ts"
 import LongArrowDownRight from "../assets/iconoir/long-arrow-down-right.svg"
+import { DISPLAY_BASE_URL } from "../constants.ts"
 import { CopyUrlButton, DeleteUrlButton, QRCodeButton } from "./UrlCardButtons.tsx"
 
 interface UrlCardProps {
@@ -13,7 +14,8 @@ export const UrlCard = ({ url, password, refetch }: UrlCardProps) => {
     <li class="block w-full rounded-lg p-4 shadow">
       <div class="flex justify-between">
         <a href={url.target_url} class="font-display font-semibold">
-          furs.id{url.short_url}
+          {DISPLAY_BASE_URL}
+          {url.short_url}
         </a>
         <div class="relative flex gap-2">
           <CopyUrlButton shortUrl={url.short_url} />
