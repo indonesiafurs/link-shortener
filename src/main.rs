@@ -10,6 +10,7 @@ use std::{net::SocketAddr, sync::Arc};
 use axum::{response::Redirect, routing::get};
 use tower_http::{
     catch_panic::CatchPanicLayer,
+    compression::CompressionLayer,
     cors::CorsLayer,
     normalize_path::NormalizePathLayer,
     services::{ServeDir, ServeFile},
@@ -52,6 +53,11 @@ async fn main() {
         .with_state(app_state)
         .layer(NormalizePathLayer::trim_trailing_slash())
         .layer(CatchPanicLayer::new())
+        .layer(
+            CompressionLayer::new()
+                .zstd(true)
+                .quality(tower_http::CompressionLevel::Precise(19)),
+        )
         .layer(permissive_cors)
         .layer(TraceLayer::new_for_http());
 
