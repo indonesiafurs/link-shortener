@@ -1,8 +1,7 @@
 import { writeClipboard } from "@solid-primitives/clipboard"
 import { useKeyDownList } from "@solid-primitives/keyboard"
 import { makeTimer } from "@solid-primitives/timer"
-import { toDataURL } from "qrcode"
-import { createSignal, onMount } from "solid-js"
+import { createSignal, lazy } from "solid-js"
 import type { DeleteShortenedUrlDto } from "../api-types.d.ts"
 import Copy from "../assets/iconoir/copy.svg"
 import qrCode from "../assets/iconoir/qr-code.svg"
@@ -53,27 +52,15 @@ interface QrCodeButtonProps {
   shortUrl: string
 }
 
-export const QRCodeButton = (props: QrCodeButtonProps) => {
-  let qrCodeDialogRef!: HTMLDialogElement
-  const [qrCodeImageData, setQrCodeImageData] = createSignal<string>()
+const QRCodeDialogContent = lazy(() => import("./QRCodeDialogContent.tsx"))
 
-  onMount(() => {
-    toDataURL(
-      // @ts-expect-error - Apparently this is a valid argument
-      undefined,
-      `https://furs.id${props.shortUrl}`,
-      {
-        errorCorrectionLevel: "high",
-        scale: 16
-      },
-      (_error, url) => {
-        setQrCodeImageData(url)
-      }
-    )
-  })
+export const QRCodeButton = (props: QrCodeButtonProps) => {
+  const [isModalOpen, setIsModalOpen] = createSignal(false)
+  let qrCodeDialogRef!: HTMLDialogElement
 
   const onShowQrCode = () => {
     qrCodeDialogRef.showModal()
+    setIsModalOpen(true)
   }
   const onCloseQrCode = () => {
     qrCodeDialogRef.close()
@@ -114,15 +101,7 @@ export const QRCodeButton = (props: QrCodeButtonProps) => {
               <img src={xMark} class="h-4 w-4" alt="Close" />
             </button>
           </div>
-          <img src={qrCodeImageData()} class="mx-auto mt-2 h-64 w-64" alt="" />
-
-          <a
-            href={qrCodeImageData()}
-            download={`furs_id${props.shortUrl.replace("/", "_")}.png`}
-            class="mx-auto mt-4 block w-full rounded-full bg-pink-500 px-4 py-2 text-center text-pink-50"
-          >
-            Download
-          </a>
+          {isModalOpen() && <QRCodeDialogContent shortUrl={props.shortUrl} />}
         </div>
       </dialog>
     </>
