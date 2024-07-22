@@ -7,7 +7,7 @@ import { CreateShortUrlDialog } from "./components/CreateUrlDialog.tsx"
 import { UrlCard } from "./components/UrlCard.tsx"
 import { API_URL } from "./constants.ts"
 
-function App() {
+function AdminPage() {
   const [password, setPassword] = makePersisted(createSignal<string>(), { name: "password" })
   const [showPassword, setShowPassword] = createSignal(false)
 
@@ -37,7 +37,7 @@ function App() {
     <>
       <AppHeader />
 
-      <main class="relative mx-auto mt-20 max-w-screen-lg px-6 lg:mt-32">
+      <main class="relative mx-auto mt-8 max-w-screen-lg px-6 lg:mt-32">
         <section class="max-w-96">
           <h1 class="font-bold font-display text-gray-700 text-xl">Admin Password</h1>
           <div class="flex gap-2">
@@ -111,4 +111,4 @@ function App() {
   )
 }
 
-export default App
+export default AdminPage
