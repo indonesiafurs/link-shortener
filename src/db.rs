@@ -1,10 +1,14 @@
+use std::fs;
+
 use libsql::Builder;
 use tracing::{debug, info, instrument};
 
-const DB_PATH: &str = "links.db";
+const DB_PATH: &str = "data/links.db";
 
 #[instrument]
 pub async fn prepare() -> libsql::Connection {
+    fs::create_dir("data").ok();
+
     let db = Builder::new_local(DB_PATH)
         .build()
         .await
