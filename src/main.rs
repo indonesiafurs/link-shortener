@@ -39,16 +39,10 @@ async fn main() {
         .allow_methods(tower_http::cors::Any)
         .allow_origin(tower_http::cors::Any);
 
-    // TODO: Figure out how to *properly* serve the client-out dir
     let app = axum::Router::new()
-        .nest_service("/assets", ServeDir::new("client-out/assets"))
-        .route_service("/admin", ServeFile::new("client-out/index.html"))
-        .route_service("/logo.svg", ServeFile::new("client-out/logo.svg"))
+        .nest_service("/", ServeDir::new("client-out"))
+        .nest_service("/admin", ServeFile::new("client-out/admin.html"))
         .nest("/api", routes::api::layer())
-        .route(
-            "/",
-            get(|| async { Redirect::to("https://furries.id/en/links") }),
-        )
         .fallback(get(routes::handle_short_url))
         .with_state(app_state)
         .layer(NormalizePathLayer::trim_trailing_slash())
