@@ -1,20 +1,20 @@
 FROM oven/bun:1-slim AS build-client
 WORKDIR /app
-ENV NODE_ENV production
+ENV NODE_ENV="production"
 COPY ./client/package.json ./client/bun.lockb ./
 RUN bun install --frozen-lockfile
 COPY client ./
 RUN bun run build --outDir client-out
 
-FROM rust:1-slim as rust-base
+FROM rust:1-slim AS rust-base
 RUN cargo install cargo-chef
 WORKDIR /app
 
-FROM rust-base as planner
+FROM rust-base AS planner
 COPY . .
 RUN cargo chef prepare --recipe-path recipe.json
 
-FROM rust-base as build-bend
+FROM rust-base AS build-bend
 COPY --from=planner /app/recipe.json recipe.json
 RUN cargo chef cook --release --recipe-path recipe.json
 COPY . .
