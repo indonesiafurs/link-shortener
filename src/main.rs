@@ -7,14 +7,9 @@
 
 use std::{net::SocketAddr, sync::Arc};
 
-use axum::{response::Redirect, routing::get};
 use tower_http::{
-    catch_panic::CatchPanicLayer,
-    compression::CompressionLayer,
-    cors::CorsLayer,
-    normalize_path::NormalizePathLayer,
-    services::{ServeDir, ServeFile},
-    trace::TraceLayer,
+    catch_panic::CatchPanicLayer, compression::CompressionLayer, cors::CorsLayer,
+    normalize_path::NormalizePathLayer, services::ServeFile, trace::TraceLayer,
 };
 use tracing::info;
 
@@ -40,10 +35,10 @@ async fn main() {
         .allow_origin(tower_http::cors::Any);
 
     let app = axum::Router::new()
-        .nest_service("/", ServeDir::new("client-out"))
+        .route_service("/", ServeFile::new("client-out/index.html"))
         .nest_service("/admin", ServeFile::new("client-out/admin.html"))
         .nest("/api", routes::api::layer())
-        .fallback(get(routes::handle_short_url))
+        .fallback(routes::handle_short_url)
         .with_state(app_state)
         .layer(NormalizePathLayer::trim_trailing_slash())
         .layer(CatchPanicLayer::new())
