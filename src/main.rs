@@ -7,6 +7,7 @@
 
 use std::{net::SocketAddr, sync::Arc};
 
+use tokio::{select, signal};
 use tower_http::{
     catch_panic::CatchPanicLayer, compression::CompressionLayer, cors::CorsLayer,
     normalize_path::NormalizePathLayer, services::ServeFile, trace::TraceLayer,
@@ -59,6 +60,35 @@ async fn main() {
         tcp_listener,
         app.into_make_service_with_connect_info::<SocketAddr>(),
     )
+    .with_graceful_shutdown(shutdown_signal())
     .await
     .expect("Server crashed :(");
+}
+
+async fn shutdown_signal() {
+    let ctrl_c = async {
+        signal::ctrl_c()
+            .await
+            .expect("failed to install Ctrl+C handler");
+    };
+
+    // *nix have a special signal for termination
+    // https://man7.org/linux/man-pages/man7/signal.7.html
+    #[cfg(unix)]
+    let terminate = async {
+        signal::unix::signal(signal::unix::SignalKind::terminate())
+            .expect("[UNIX ONLY] Terminate signal handler installation failed")
+            .recv()
+            .await;
+    };
+
+    #[cfg(not(unix))]
+    let terminate = std::future::pending::<()>();
+
+    select! {
+        () = ctrl_c => {},
+        () = terminate => {},
+    }
+
+    info!("Exit signal captured. Shutting down gracefully..");
 }
