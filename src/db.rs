@@ -16,7 +16,7 @@ pub async fn prepare() -> libsql::Connection {
 
     let conn = db.connect().expect("Unable to get database connection");
 
-    info!("Running migrations");
+    debug!("Running migrations");
     migrate(conn.clone()).await;
 
     conn
