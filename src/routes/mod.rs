@@ -25,7 +25,7 @@ pub async fn handle_short_url(
 
     // TODO: Logging support?
     let query = req.uri().query().unwrap_or_default();
-    let uri = req.uri().path().to_lowercase();
+    let uri = req.uri().path();
     let path = Path::new("client-out/").join(uri.trim_start_matches('/'));
 
     // Highest priority: Serve static file exists in client-out
@@ -60,7 +60,7 @@ pub async fn handle_short_url(
     let mut target_url_query_rows = conn
         .query(
             "SELECT target_url FROM links WHERE short_url = ?",
-            [uri.as_str()],
+            [uri.to_lowercase().as_str()],
         )
         .await
         .expect("Unable to execute query");
