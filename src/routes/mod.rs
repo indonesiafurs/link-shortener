@@ -1,4 +1,4 @@
-use std::{path::Path, sync::Arc};
+use std::{path::Path, sync::Arc, time::UNIX_EPOCH};
 
 use axum::{
     extract::{Request, State},
@@ -6,6 +6,7 @@ use axum::{
     response::IntoResponse,
 };
 use axum_client_ip::InsecureClientIp;
+use chrono::DateTime;
 use tokio_util::io::ReaderStream;
 use tracing::{info, instrument};
 
@@ -30,11 +31,26 @@ pub async fn handle_short_url(
 
     // Highest priority: Serve static file exists in client-out
     if let Ok(file) = tokio::fs::File::open(path).await {
-        let file_size = file
+        let file_meta = file
             .metadata()
             .await
-            .expect("Unable to read a file's metadata. Does the current user have read access?")
-            .len();
+            .expect("Unable to read a file's metadata");
+        let file_size = file_meta.len();
+        let file_last_modified_timestamp = file_meta
+            .modified()
+            .expect("Unable to get file modified time")
+            .duration_since(UNIX_EPOCH)
+            .expect("Unable to convert file modified time to UNIX_EPOCH. Is the the file's last modified time set to before unix epoch?").as_secs();
+        let file_last_modified_date = DateTime::from_timestamp(
+            i64::try_from(file_last_modified_timestamp)
+                .expect("Unable to convert file last modified timestamp to i64"),
+            0,
+        )
+        .unwrap()
+        .with_timezone(&chrono_tz::GMT);
+        let mut file_last_modified_header = file_last_modified_date.to_rfc2822();
+        file_last_modified_header.replace_range(26.., "GMT");
+
         let mime_type = mime_guess::from_path(req.uri().path())
             .first_or_text_plain()
             .to_string();
@@ -42,6 +58,7 @@ pub async fn handle_short_url(
             (header::CONTENT_TYPE, mime_type),
             (header::CONTENT_LENGTH, file_size.to_string()),
             (header::CACHE_CONTROL, "public, max-age=86400".to_string()),
+            (header::LAST_MODIFIED, file_last_modified_header),
         ];
 
         // Only return headers if the request is not a HEAD request
