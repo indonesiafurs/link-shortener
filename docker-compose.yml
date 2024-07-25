@@ -1,0 +1,14 @@
+services:
+  link-shortener:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./data:/app/data
+    environment:
+      # The API key is used to authenticate API requests.
+      API_KEY: "SUKSES_IWAG_UNTUK_BELI_TANGGA_BARU"
+      # OPTIONAL: "Base URL" to be shown in the UI.
+      # Without https:// or leading slash
+      # Defaults to "furs.id"
+      VITE_DISPLAY_BASE_URL: "furs.id"
