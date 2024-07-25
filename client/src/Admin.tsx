@@ -37,7 +37,7 @@ function AdminPage() {
     <>
       <AppHeader />
 
-      <main class="relative mx-auto mt-8 max-w-screen-lg px-6 lg:mt-32">
+      <main class="relative mx-auto container px-6">
         <section class="max-w-96">
           <h1 class="font-bold font-display text-gray-700 text-xl">Admin Password</h1>
           <div class="flex gap-2">
