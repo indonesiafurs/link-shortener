@@ -1,0 +1,5 @@
+Contact: mailto:security@furries.id
+Contact: https://t.me/hopesa
+Expires: 2025-12-31T16:59:00.000Z
+Preferred-Languages: en,id
+Canonical: https://furries.id/.well-known/security.txt
