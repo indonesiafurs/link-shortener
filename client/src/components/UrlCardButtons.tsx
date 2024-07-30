@@ -6,7 +6,7 @@ import type { DeleteShortenedUrlDto } from "../api-types.d.ts"
 import Copy from "../assets/iconoir/copy.svg"
 import qrCode from "../assets/iconoir/qr-code.svg"
 import xMark from "../assets/iconoir/xmark.svg"
-import { API_URL } from "../constants.ts"
+import { API_URL, DISPLAY_BASE_URL } from "../constants.ts"
 
 interface CopyUrlButtonProps {
   shortUrl: string
@@ -16,7 +16,7 @@ export const CopyUrlButton = (props: CopyUrlButtonProps) => {
   const [hasClickedBefore, setHasClickedBefore] = createSignal(false)
 
   const onCopyUrl = () => {
-    writeClipboard(`https://furs.id${props.shortUrl}`)
+    writeClipboard(`https://${DISPLAY_BASE_URL}${props.shortUrl}`)
     setHasClickedBefore(true)
     return makeTimer(
       () => {
@@ -91,7 +91,11 @@ export const QRCodeButton = (props: QrCodeButtonProps) => {
         <div class="mx-auto w-96 rounded-xl border border-gray-400 bg-gray-50 px-4 py-4">
           <div class="flex justify-between">
             <h1 class="font-display font-medium text-gray-800 text-lg">
-              QR Code for <b>furs.id{props.shortUrl}</b>
+              QR Code for{" "}
+              <b>
+                {DISPLAY_BASE_URL}
+                {props.shortUrl}
+              </b>
             </h1>
             <button
               type="button"

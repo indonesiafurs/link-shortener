@@ -2,7 +2,7 @@ import { createSignal } from "solid-js"
 import type { CreateShortenedUrlDto } from "../api-types.d.ts"
 import xMark from "../assets/iconoir/xmark.svg"
 import Spinner from "../assets/spinner.svg"
-import { API_URL } from "../constants.ts"
+import { API_URL, DISPLAY_BASE_URL } from "../constants.ts"
 
 type CreateShortUrlDialogProps = {
   ref: HTMLDialogElement
@@ -63,7 +63,7 @@ export const CreateShortUrlDialog = (props: CreateShortUrlDialogProps) => {
             Short Link
             <div class="flex rounded border-2">
               <span class="border-r bg-gray-100 px-2 py-1 text-gray-700 text-sm">
-                https://furs.id/
+                https://{DISPLAY_BASE_URL}/
               </span>
               <input
                 ref={shortUrlInput}
