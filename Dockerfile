@@ -1,6 +1,7 @@
 FROM oven/bun:1-slim AS build-client
 WORKDIR /app
 ENV NODE_ENV="production"
+ARG VITE_DISPLAY_BASE_URL "furs.id"
 COPY ./client/package.json ./client/bun.lockb ./
 RUN bun install --frozen-lockfile
 COPY client ./
