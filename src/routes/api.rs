@@ -29,6 +29,8 @@ pub fn layer() -> axum::Router<Arc<crate::AppState>> {
         .layer(ValidateRequestHeaderLayer::bearer(
             &bearer_token.unwrap_or_else(|_| DEFAULT_API_KEY.to_string()),
         ))
+        // No authentication required for health check
+        .route("/health-check", get(health_check))
 }
 
 #[typeshare]
@@ -147,4 +149,19 @@ async fn delete_url(
     }
 
     StatusCode::NO_CONTENT.into_response()
+}
+
+async fn health_check(State(state): State<Arc<AppState>>) -> impl IntoResponse {
+    // Check database connection
+    let conn = state.db.clone();
+    let rows = conn.query("SELECT 1", ()).await;
+
+    match rows {
+        Err(_) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "Database connection failed",
+        )
+            .into_response(),
+        Ok(_) => (StatusCode::OK, "OK").into_response(),
+    }
 }
