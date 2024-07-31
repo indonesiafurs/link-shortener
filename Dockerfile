@@ -7,8 +7,7 @@ RUN bun install --frozen-lockfile
 COPY client ./
 RUN bun run build --outDir client-out
 
-FROM rust:1-slim AS rust-base
-RUN cargo install cargo-chef
+FROM lukemathwalker/cargo-chef:latest-rust-slim AS rust-base
 WORKDIR /app
 
 FROM rust-base AS planner
