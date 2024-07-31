@@ -51,10 +51,13 @@ async fn main() {
         .layer(permissive_cors)
         .layer(TraceLayer::new_for_http());
 
-    let tcp_listener = tokio::net::TcpListener::bind("0.0.0.0:3000")
+    let host = std::env::var("HOST").unwrap_or_else(|_| "0.0.0.0".to_string());
+    let port = std::env::var("PORT").unwrap_or_else(|_| "3000".to_string());
+
+    let tcp_listener = tokio::net::TcpListener::bind(format!("{host}:{port}"))
         .await
-        .expect("Unable to bind to :3000");
-    info!("Listening on 0.0.0.0:3000");
+        .expect("Unable to bind to :{port}");
+    info!("Listening on {host}:{port}");
 
     axum::serve(
         tcp_listener,
