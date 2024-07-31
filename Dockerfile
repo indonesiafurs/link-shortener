@@ -24,6 +24,7 @@ FROM gcr.io/distroless/cc-debian12
 COPY --from=build-bend /app/target/release/link-shortener /
 COPY --from=build-client /app/client-out/ /client-out/
 
+ENV HOST="0.0.0.0"
+ENV PORT="3000"
 VOLUME [ "/app/data/" ]
-EXPOSE 3000/tcp
 CMD ["./link-shortener"]
