@@ -37,6 +37,10 @@ export const CreateShortUrlDialog = (props: CreateShortUrlDialogProps) => {
     })
 
     setIsSubmitting(false)
+    // Clear the form
+    shortUrlInput.value = ""
+    destinationUrlInput.value = ""
+    commentInput.value = ""
     props.onClose?.()
     props.refetch()
   }
