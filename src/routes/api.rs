@@ -40,6 +40,7 @@ pub struct ShortenedUrl {
     target_url: String,
     comment: Option<String>,
     active: bool,
+    visitor_count: u64,
 }
 
 #[typeshare]
@@ -50,7 +51,7 @@ async fn list_urls(State(state): State<Arc<AppState>>) -> Json<AllShortenedUrls>
 
     let mut rows = conn
         .query(
-            "SELECT short_url, target_url, comment, active FROM links",
+            "SELECT short_url, target_url, comment, active, visitor_count FROM links",
             (),
         )
         .await
@@ -62,11 +63,13 @@ async fn list_urls(State(state): State<Arc<AppState>>) -> Json<AllShortenedUrls>
         let target_url = row.get::<String>(1).expect("Unable to get target_url");
         let comment = row.get::<Option<String>>(2).expect("Unable to get active");
         let active = row.get::<bool>(3).expect("Unable to get active");
+        let visitor_count = row.get::<u64>(4).expect("Unable to get visitor_count");
         urls.push(ShortenedUrl {
             short_url,
             target_url,
             comment,
             active,
+            visitor_count,
         });
     }
 
