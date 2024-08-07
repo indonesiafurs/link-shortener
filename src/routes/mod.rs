@@ -74,10 +74,11 @@ pub async fn handle_short_url(
     }
 
     let conn = state.db.clone();
+    let short_url = uri.to_lowercase();
     let mut target_url_query_rows = conn
         .query(
             "SELECT target_url FROM links WHERE short_url = ?",
-            [uri.to_lowercase().as_str()],
+            [short_url.clone()],
         )
         .await
         .expect("Unable to execute query");
@@ -86,6 +87,14 @@ pub async fn handle_short_url(
     if let Some(row) = target_url_query_rows.next().await.unwrap() {
         let target_url = row.get::<String>(0).expect("Unable to get target_url");
         info!("[{ip:?}] Redirecting {uri} to {target_url}");
+
+        conn.execute(
+            "UPDATE OR IGNORE links SET visitor_count = visitor_count + 1 WHERE short_url = ?;",
+            [short_url.clone()],
+        )
+        .await
+        .ok();
+
         axum::response::Redirect::to(&target_url).into_response()
     } else {
         info!("[{ip:?}] Visited {uri}");

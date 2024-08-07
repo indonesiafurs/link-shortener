@@ -1,7 +1,7 @@
 use std::fs;
 
 use libsql::Builder;
-use tracing::{debug, info, instrument};
+use tracing::{debug, instrument};
 
 const DB_PATH: &str = "data/links.db";
 
@@ -48,6 +48,17 @@ async fn migrate(conn: libsql::Connection) {
         .await
         .expect("Unable to create links table");
         version = 1;
+    }
+
+    if version == 1 {
+        debug!("Migrating from version 1 -> 2");
+        conn.execute(
+            "ALTER TABLE links ADD COLUMN visitor_count INTEGER DEFAULT 0",
+            (),
+        )
+        .await
+        .expect("Unable to add visitor_count column");
+        version = 2;
     }
 
     conn.execute(&format!("PRAGMA user_version = {version}"), ())
